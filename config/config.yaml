@@ -6,6 +6,7 @@ whisper:
   model: "whisper-small"
   model_path: "./models/ggml-small.bin"
   threads: 4
+  device: "cuda"
 
 workers:
   count: 4  # Number of concurrent transcription workers

@@ -18,6 +18,51 @@ Building a Golang-based audio transcription backend that processes audio files, 
 | YouTube Capture | chromedp (headless Chrome) |
 | WebSocket | Fiber WebSocket |
 
+## System Flow & Architecture
+
+### 1. Data Flow Pipeline
+The application follows a linear pipeline architecture:
+
+1.  **Input Layer**:
+    *   **API**: Receives file uploads (`/upload`) or links (`/gdrive`, `/youtube`).
+    *   **WebSocket**: Receives raw audio chunks (`/ws/stream`).
+2.  **Handler Layer**:
+    *   Validates input.
+    *   Downloads content (if link) to `temp/`.
+    *   Creates a `Job` object with a unique UUID.
+    *   Enqueues the job into the `WorkerPool`.
+3.  **Queue System**:
+    *   Buffered Go Channels hold pending jobs.
+    *   Decouples input (fast) from processing (slow).
+4.  **Worker Layer**:
+    *   4 concurrent workers pull jobs from the queue.
+    *   **Normalization**: Converts any audio format to 16kHz WAV using `ffmpeg`.
+    *   **Transcription**: Calls Python Whisper via subprocess.
+5.  **Storage Layer**:
+    *   **Local**: Saves `.txt` and `.json` metadata to `outputs/YYYY/MM/DD/`.
+    *   **Cloud**: Uploads to Google Drive (if configured).
+    *   **Database**: Records job metadata in SQLite.
+
+### 2. Dependencies & "cu118" Explained
+
+#### Core Dependencies
+*   **Golang**: The orchestrator. Handles HTTP requests, concurrency, and file management.
+    *   `gofiber/fiber`: High-performance web framework.
+    *   `modernc.org/sqlite`: Pure Go SQLite driver (no CGO required).
+*   **Python**: The AI engine.
+    *   `openai-whisper`: The core transcription model.
+    *   `torch` (PyTorch): The machine learning framework Whisper runs on.
+
+#### What is "cu118"?
+You will see references to `cu118` in the PyTorch installation (e.g., `torch --index-url .../cu118`).
+*   **CUDA**: Compute Unified Device Architecture. It's NVIDIA's platform for parallel computing on GPUs.
+*   **11.8**: The specific version of the CUDA Toolkit.
+*   **Significance**: PyTorch must be built against the specific CUDA version installed on your system (or the one it bundles). Using the `cu118` version of PyTorch allows the application to offload the heavy matrix multiplications of the AI model to your **RTX 3060 GPU**, making transcription 10-50x faster than CPU.
+
+#### External Tools
+*   **FFmpeg**: The "Swiss Army Knife" of audio/video. Used to normalize inputs (e.g., convert a user's random MP3 or WebM file into the specific 16kHz WAV format Whisper requires).
+*   **yt-dlp**: A command-line tool used to extract audio tracks from YouTube videos efficiently without downloading the video stream.
+
 ## Architecture Evolution Path
 
 ### NOW (Personal Use / MVP)

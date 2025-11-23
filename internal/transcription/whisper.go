@@ -17,12 +17,13 @@ import (
 type WhisperTranscriber struct {
 	modelName  string
 	whisperCmd string
+	device     string
 	threads    int
 	mu         sync.Mutex // Thread-safe transcription
 }
 
 // NewWhisperTranscriber creates a new transcriber using Python Whisper
-func NewWhisperTranscriber(modelPath string, threads int) (*WhisperTranscriber, error) {
+func NewWhisperTranscriber(modelPath string, threads int, device string) (*WhisperTranscriber, error) {
 	// For Python Whisper, we use the model name instead of path
 	// Extract model name from path (e.g., "ggml-small.bin" -> "small")
 	modelName := "small" // Default to small
@@ -39,13 +40,14 @@ func NewWhisperTranscriber(modelPath string, threads int) (*WhisperTranscriber, 
 		modelName = "large"
 	}
 
-	log.Printf("Initializing Python Whisper with model: %s", modelName)
+	log.Printf("Initializing Python Whisper with model: %s (device: %s)", modelName, device)
 	log.Printf("Whisper will be called via: python -m whisper")
 	log.Printf("Note: Whisper availability will be verified on first transcription")
 
 	return &WhisperTranscriber{
 		modelName:  modelName,
 		whisperCmd: "python",
+		device:     device,
 		threads:    threads,
 	}, nil
 }
@@ -76,7 +78,8 @@ func (wt *WhisperTranscriber) Transcribe(audioPath string) (*types.Transcription
 		"--output_dir", tempDir,
 		"--output_format", "json", // Get JSON for segments
 		"--language", "en",         // Auto-detect if not specified
-		"--fp16", "False",          // Disable fp16 for CPU compatibility
+		"--device", wt.device,      // Use configured device (cuda or cpu)
+		"--fp16", "False",          // Disable fp16 for compatibility (unless on GPU, but safe to keep False for now)
 	)
 
 	// Capture output
