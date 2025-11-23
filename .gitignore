@@ -53,3 +53,8 @@ Thumbs.db
 # Debug files
 *.html
 *_debug.*
+*_test.ps1
+*_temp.ps1
+notes.md
+draft*.md
+TODO.md
