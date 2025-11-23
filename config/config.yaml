@@ -1,0 +1,29 @@
+server:
+  port: 3000
+  host: "0.0.0.0"
+
+whisper:
+  model: "whisper-small"
+  model_path: "./models/ggml-small.bin"
+  threads: 4
+
+workers:
+  count: 4  # Number of concurrent transcription workers
+
+storage:
+  temp_dir: "./temp"
+  output_dir: "./outputs"
+  database: "./transcription.db"
+
+cleanup:
+  interval_minutes: 60
+  max_age_hours: 24
+
+google_drive:
+  credentials_file: "./credentials.json"
+  token_file: "./token.json"
+  folder_name: "Transcripts"
+
+limits:
+  max_file_size_mb: 500
+  max_duration_minutes: 120

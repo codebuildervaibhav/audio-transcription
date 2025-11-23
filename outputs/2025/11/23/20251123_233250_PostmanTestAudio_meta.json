@@ -1,0 +1,28 @@
+{
+  "created_at": "2025-11-23T23:32:50.8133278+05:30",
+  "duration_seconds": 13.64,
+  "gdrive_url": "",
+  "job_id": "dbc2f1fa-87c6-4339-a50e-4c3609dca5fe",
+  "language": "en",
+  "local_path": "outputs\\2025\\11\\23\\20251123_233250_PostmanTestAudio.txt",
+  "model_used": "whisper-small",
+  "request_name": "PostmanTestAudio",
+  "segments": [
+    {
+      "start": 0,
+      "end": 6.44,
+      "text": "This file, this file is for recording purposes. We are going to use this as the primary source"
+    },
+    {
+      "start": 6.44,
+      "end": 13,
+      "text": "for converted into a text file for our application that we are creating. So let's test this"
+    },
+    {
+      "start": 13,
+      "end": 13.64,
+      "text": "for the video."
+    }
+  ],
+  "word_count": 38
+}

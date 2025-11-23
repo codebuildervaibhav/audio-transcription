@@ -1,0 +1,420 @@
+{
+  "info": {
+    "name": "Audio Transcription Backend API",
+    "description": "Complete API collection for testing the audio-to-text transcription backend. Supports file uploads, Google Drive links, YouTube videos, and WebSocket streaming.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "job_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has status field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData.status).to.eql('healthy');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the server is running and healthy"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"status\": \"healthy\",\n  \"version\": \"1.0.0\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Upload Audio File",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Upload successful\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains job_id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('job_id');",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    ",
+              "    // Save job_id for later use",
+              "    pm.collectionVariables.set('job_id', jsonData.job_id);",
+              "});",
+              "",
+              "pm.test(\"Status is queued\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('queued');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": [],
+              "description": "Select an audio file (MP3, WAV, M4A, etc.)"
+            },
+            {
+              "key": "name",
+              "value": "PostmanTestAudio",
+              "type": "text",
+              "description": "Name for the transcription request"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/upload",
+          "host": ["{{base_url}}"],
+          "path": ["upload"]
+        },
+        "description": "Upload an audio file for transcription.\n\n**Instructions:**\n1. Click on 'file' field in Body\n2. Click 'Select Files'\n3. Choose an audio file from your computer\n4. Optionally change the 'name' field\n5. Send the request\n\n**Supported formats:** MP3, WAV, M4A, OGG, FLAC, WebM, AAC, WMA\n**Max size:** 500MB (configurable)"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "test_audio.mp3"
+                },
+                {
+                  "key": "name",
+                  "value": "PostmanTestAudio",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload",
+              "host": ["{{base_url}}"],
+              "path": ["upload"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"job_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"status\": \"queued\",\n  \"message\": \"File uploaded successfully, processing started\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Process Google Drive Link",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Request accepted\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains job_id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('job_id');",
+              "    pm.collectionVariables.set('job_id', jsonData.job_id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://drive.google.com/file/d/YOUR_FILE_ID_HERE/view\",\n  \"name\": \"GoogleDriveTest\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/gdrive",
+          "host": ["{{base_url}}"],
+          "path": ["gdrive"]
+        },
+        "description": "Process an audio file from Google Drive.\n\n**Instructions:**\n1. Share your audio file on Google Drive (Anyone with the link can view)\n2. Copy the share link\n3. Replace `YOUR_FILE_ID_HERE` in the request body\n4. Send the request\n\n**Supported URL formats:**\n- `https://drive.google.com/file/d/{ID}/view`\n- `https://drive.google.com/open?id={ID}`\n- Direct file ID\n\n**Example:**\n```json\n{\n  \"url\": \"https://drive.google.com/file/d/1AbC_dEfGhIjKlMnOpQrStUvWxYz/view\",\n  \"name\": \"MeetingRecording\"\n}\n```"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://drive.google.com/file/d/1AbC_dEfGhIjKlMnOpQrStUvWxYz/view\",\n  \"name\": \"GoogleDriveTest\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/gdrive",
+              "host": ["{{base_url}}"],
+              "path": ["gdrive"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"job_id\": \"660f9511-f3ac-52e5-b827-557766551111\",\n  \"status\": \"queued\",\n  \"message\": \"Google Drive file downloaded, processing started\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Capture YouTube Audio",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"YouTube capture started\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains job_id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('job_id');",
+              "    pm.collectionVariables.set('job_id', jsonData.job_id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"name\": \"YouTubeTest\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/youtube",
+          "host": ["{{base_url}}"],
+          "path": ["youtube"]
+        },
+        "description": "Extract and transcribe audio from a YouTube video.\n\n**Requirements:**\n- `yt-dlp` must be installed: `pip install yt-dlp`\n\n**Instructions:**\n1. Copy a YouTube video URL\n2. Replace the URL in the request body\n3. Give it a meaningful name\n4. Send the request\n\n**Note:** This may take several minutes for long videos.\n\n**Example:**\n```json\n{\n  \"url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"name\": \"TED_Talk_AI\"\n}\n```"
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"name\": \"YouTubeTest\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/youtube",
+              "host": ["{{base_url}}"],
+              "path": ["youtube"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"job_id\": \"770g0622-g4bd-63f6-c938-668877662222\",\n  \"status\": \"capturing\",\n  \"message\": \"YouTube audio capture started (this may take a few minutes for long videos)\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "List All Transcripts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response is an array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test(\"Each transcript has required fields\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        var transcript = jsonData[0];",
+              "        pm.expect(transcript).to.have.property('job_id');",
+              "        pm.expect(transcript).to.have.property('request_name');",
+              "        pm.expect(transcript).to.have.property('source_type');",
+              "        pm.expect(transcript).to.have.property('local_path');",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/transcripts",
+          "host": ["{{base_url}}"],
+          "path": ["transcripts"]
+        },
+        "description": "Retrieve a list of all transcribed audio files.\n\nReturns up to 50 most recent transcripts sorted by creation date (newest first).\n\n**Response includes:**\n- `job_id`: Unique identifier\n- `request_name`: Name given to the transcription\n- `source_type`: Origin (upload, gdrive, youtube, stream)\n- `gdrive_url`: Google Drive link (if enabled)\n- `local_path`: Path to transcript file\n- `created_at`: Timestamp\n- `duration`: Audio duration in seconds\n- `word_count`: Number of words in transcript"
+      },
+      "response": [
+        {
+          "name": "Success - With Transcripts",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transcripts",
+              "host": ["{{base_url}}"],
+              "path": ["transcripts"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[\n  {\n    \"job_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"request_name\": \"PostmanTestAudio\",\n    \"source_type\": \"upload\",\n    \"gdrive_url\": \"https://drive.google.com/file/d/.../view\",\n    \"local_path\": \"./outputs/2025/11/23/20251123_213022_PostmanTestAudio.txt\",\n    \"created_at\": \"2025-11-23T21:30:22Z\",\n    \"duration\": 125.5,\n    \"word_count\": 342\n  },\n  {\n    \"job_id\": \"660f9511-f3ac-52e5-b827-557766551111\",\n    \"request_name\": \"GoogleDriveTest\",\n    \"source_type\": \"gdrive\",\n    \"gdrive_url\": \"https://drive.google.com/file/d/.../view\",\n    \"local_path\": \"./outputs/2025/11/23/20251123_212515_GoogleDriveTest.txt\",\n    \"created_at\": \"2025-11-23T21:25:15Z\",\n    \"duration\": 847.2,\n    \"word_count\": 1523\n  }\n]"
+        },
+        {
+          "name": "Success - Empty",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transcripts",
+              "host": ["{{base_url}}"],
+              "path": ["transcripts"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[]"
+        }
+      ]
+    },
+    {
+      "name": "WebSocket Streaming Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/ws/stream",
+          "host": ["{{base_url}}"],
+          "path": ["ws", "stream"]
+        },
+        "description": "**WebSocket Streaming Endpoint**\n\nPostman doesn't support WebSocket testing in collections, but you can test this endpoint using:\n\n1. **Browser-based tools:**\n   - [Postman Desktop App](https://www.postman.com/downloads/) (has WebSocket support)\n   - [WebSocket King](https://websocketking.com/)\n   - Browser DevTools\n\n2. **Code Example (JavaScript):**\n```javascript\nconst ws = new WebSocket('ws://localhost:3000/ws/stream');\n\n// Send recording name\nws.send('LiveRecording');\n\n// Send audio chunks (from MediaRecorder)\nmediaRecorder.ondataavailable = (event) => {\n  if (event.data.size > 0) {\n    ws.send(event.data); // Binary data\n  }\n};\n\n// Signal end\nws.send('END');\n\n// Receive job ID\nws.onmessage = (event) => {\n  const response = JSON.parse(event.data);\n  console.log('Job ID:', response.job_id);\n};\n```\n\n3. **Python Example:**\n```python\nimport websocket\nimport json\n\nws = websocket.create_connection('ws://localhost:3000/ws/stream')\nws.send('TestRecording')  # Set name\n\n# Send audio chunks\nwith open('audio.webm', 'rb') as f:\n    chunk = f.read(1024)\n    while chunk:\n        ws.send_binary(chunk)\n        chunk = f.read(1024)\n\nws.send('END')  # Signal completion\nresponse = json.loads(ws.recv())\nprint(f\"Job ID: {response['job_id']}\")\nws.close()\n```\n\n**Protocol:**\n1. Connect to `ws://localhost:3000/ws/stream`\n2. Send text message with recording name (optional)\n3. Send binary audio chunks\n4. Send text message \"END\" to finish\n5. Receive JSON response with job_id"
+      },
+      "response": []
+    }
+  ]
+}

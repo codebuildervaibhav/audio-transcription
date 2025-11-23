@@ -1,0 +1,51 @@
+# DO NOT COMMIT THESE FILES TO VERSION CONTROL
+
+# Temporary files
+temp/
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.flac
+*.webm
+*.aac
+*.wma
+*.opus
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+transcription.db
+
+# Google Drive credentials
+credentials.json
+token.json
+
+# Whisper models (large files)
+models/*.bin
+
+# Build artifacts
+transcription-server
+transcription-server.exe
+*.exe
+
+# Go
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Output (optional - remove if you want to track transcripts)
+# outputs/
