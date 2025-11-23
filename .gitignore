@@ -49,3 +49,7 @@ Thumbs.db
 
 # Output (optional - remove if you want to track transcripts)
 # outputs/
+
+# Debug files
+*.html
+*_debug.*
