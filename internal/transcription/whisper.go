@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // WhisperTranscriber wraps Python's OpenAI Whisper for transcription

@@ -16,11 +16,11 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"gopkg.in/yaml.v3"
 
-	"github.com/vaibh/audio-transcription/internal/cleanup"
-	"github.com/vaibh/audio-transcription/internal/handlers"
-	"github.com/vaibh/audio-transcription/internal/queue"
-	"github.com/vaibh/audio-transcription/internal/storage"
-	"github.com/vaibh/audio-transcription/internal/transcription"
+	"github.com/codebuildervaibhav/audio-transcription/internal/cleanup"
+	"github.com/codebuildervaibhav/audio-transcription/internal/handlers"
+	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
+	"github.com/codebuildervaibhav/audio-transcription/internal/storage"
+	"github.com/codebuildervaibhav/audio-transcription/internal/transcription"
 )
 
 // Config represents the application configuration

@@ -9,8 +9,8 @@ import (
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
-	"github.com/vaibh/audio-transcription/internal/queue"
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // StreamHandler handles WebSocket audio streaming

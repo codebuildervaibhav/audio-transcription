@@ -1,4 +1,4 @@
-module github.com/vaibh/audio-transcription
+module github.com/codebuildervaibhav/audio-transcription
 
 go 1.24.0
 

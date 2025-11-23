@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // Job represents a transcription job

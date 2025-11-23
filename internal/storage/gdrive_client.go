@@ -13,7 +13,7 @@ import (
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
 
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // DriveClient handles uploading to Google Drive

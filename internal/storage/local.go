@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // LocalStorage handles saving transcripts to the local filesystem

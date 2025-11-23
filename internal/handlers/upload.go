@@ -7,9 +7,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/vaibh/audio-transcription/internal/queue"
-	"github.com/vaibh/audio-transcription/internal/transcription"
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
+	"github.com/codebuildervaibhav/audio-transcription/internal/transcription"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // UploadHandler handles file uploads

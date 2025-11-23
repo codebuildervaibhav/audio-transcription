@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vaibh/audio-transcription/internal/storage"
-	"github.com/vaibh/audio-transcription/internal/transcription"
-	"github.com/vaibh/audio-transcription/internal/types"
+	"github.com/codebuildervaibhav/audio-transcription/internal/storage"
+	"github.com/codebuildervaibhav/audio-transcription/internal/transcription"
+	"github.com/codebuildervaibhav/audio-transcription/internal/types"
 )
 
 // WorkerPool manages a pool of workers processing transcription jobs
