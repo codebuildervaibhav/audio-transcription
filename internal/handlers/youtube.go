@@ -1,5 +1,8 @@
 package handlers
 
+// YouTube audio capture handler — extracts audio from YouTube videos
+// using yt-dlp with headless Chrome fallback for URL resolution.
+
 import (
 	"context"
 	"fmt"
@@ -8,12 +11,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/chromedp/chromedp"
 	"github.com/chromedp/cdproto/runtime"
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/chromedp/chromedp"
 	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
 	"github.com/codebuildervaibhav/audio-transcription/internal/types"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // YouTubeHandler handles YouTube video audio capture
@@ -137,14 +140,14 @@ func (h *YouTubeHandler) captureYouTubeAudio(url, outputPath string) error {
 func (h *YouTubeHandler) captureWithYtDlp(url, outputPath string) error {
 	// Note: This requires yt-dlp to be installed
 	// Install: pip install yt-dlp
-	
+
 	log.Printf("Using yt-dlp to download: %s", url)
-	
+
 	// Use yt-dlp to extract audio
 	cmd := exec.Command("yt-dlp",
-		"-x",                    // Extract audio
+		"-x",                     // Extract audio
 		"--audio-format", "opus", // Opus format
-		"-o", outputPath,        // Output path
+		"-o", outputPath, // Output path
 		url,
 	)
 

@@ -1,3 +1,5 @@
+// Package cleanup provides background temp file management with
+// configurable age limits and periodic sweep intervals.
 package cleanup
 
 import (
@@ -33,7 +35,7 @@ func (s *Scheduler) Start() {
 
 	// Start periodic cleanup
 	ticker := time.NewTicker(time.Duration(s.intervalMinutes) * time.Minute)
-	
+
 	go func() {
 		for {
 			select {
@@ -46,7 +48,7 @@ func (s *Scheduler) Start() {
 		}
 	}()
 
-	log.Printf("Cleanup scheduler started (interval: %dm, max age: %dh)", 
+	log.Printf("Cleanup scheduler started (interval: %dm, max age: %dh)",
 		s.intervalMinutes, s.maxAgeHours)
 }
 
@@ -60,7 +62,7 @@ func (s *Scheduler) Stop() {
 func (s *Scheduler) cleanOldFiles() {
 	now := time.Now()
 	maxAge := time.Duration(s.maxAgeHours) * time.Hour
-	
+
 	var deletedCount int
 	var deletedSize int64
 
@@ -83,7 +85,7 @@ func (s *Scheduler) cleanOldFiles() {
 			} else {
 				deletedCount++
 				deletedSize += size
-				log.Printf("Deleted old temp file: %s (age: %s, size: %dKB)", 
+				log.Printf("Deleted old temp file: %s (age: %s, size: %dKB)",
 					filepath.Base(path), age.Round(time.Hour), size/1024)
 			}
 		}
@@ -96,7 +98,7 @@ func (s *Scheduler) cleanOldFiles() {
 	}
 
 	if deletedCount > 0 {
-		log.Printf("Cleanup complete: %d files deleted, %.2fMB freed", 
+		log.Printf("Cleanup complete: %d files deleted, %.2fMB freed",
 			deletedCount, float64(deletedSize)/(1024*1024))
 	}
 }

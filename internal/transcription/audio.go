@@ -1,3 +1,5 @@
+// Package transcription wraps OpenAI Whisper for GPU-accelerated
+// speech-to-text, with FFmpeg audio normalization and format validation.
 package transcription
 
 import (
@@ -17,10 +19,10 @@ func NormalizeAudio(inputPath string) (string, error) {
 	// FFmpeg command: convert to 16kHz mono WAV
 	cmd := exec.Command("ffmpeg",
 		"-i", inputPath,
-		"-ar", "16000",      // 16kHz sample rate
-		"-ac", "1",          // Mono
+		"-ar", "16000", // 16kHz sample rate
+		"-ac", "1", // Mono
 		"-c:a", "pcm_s16le", // 16-bit PCM
-		"-y",                // Overwrite output
+		"-y", // Overwrite output
 		outputPath,
 	)
 
@@ -36,7 +38,7 @@ func NormalizeAudio(inputPath string) (string, error) {
 func ValidateAudioFormat(filename string) bool {
 	ext := strings.ToLower(filepath.Ext(filename))
 	supportedFormats := []string{".mp3", ".wav", ".m4a", ".ogg", ".flac", ".webm", ".aac", ".wma"}
-	
+
 	for _, format := range supportedFormats {
 		if ext == format {
 			return true

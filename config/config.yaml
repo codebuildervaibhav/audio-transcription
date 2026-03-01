@@ -1,15 +1,15 @@
+# ── Audio Transcription Service Configuration ──
+
 server:
   port: 3000
   host: "0.0.0.0"
 
 whisper:
-  model: "whisper-small"
-  model_path: "./models/ggml-small.bin"
-  threads: 4
-  device: "cuda"
+  model: "small"           # tiny | base | small | medium | large
+  device: "cuda"           # cuda (GPU) or cpu
 
 workers:
-  count: 4  # Number of concurrent transcription workers
+  count: 4                 # concurrent transcription workers
 
 storage:
   temp_dir: "./temp"
@@ -17,8 +17,8 @@ storage:
   database: "./transcription.db"
 
 cleanup:
-  interval_minutes: 60
-  max_age_hours: 24
+  interval_minutes: 60     # temp sweep interval
+  max_age_hours: 24        # max age before deletion
 
 google_drive:
   credentials_file: "./credentials.json"
@@ -28,3 +28,4 @@ google_drive:
 limits:
   max_file_size_mb: 500
   max_duration_minutes: 120
+

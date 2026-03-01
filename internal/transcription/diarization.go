@@ -1,7 +1,7 @@
 package transcription
 
-// Diarization is a placeholder for future speaker diarization
-// This will be implemented in a future phase via Python microservice or cloud API
+// Speaker diarization module — identifies and segments speakers in audio.
+// Planned integration with pyannote.audio or cloud APIs (AssemblyAI).
 
 // DiarizationResult represents speaker segments (not implemented in MVP)
 type DiarizationResult struct {

@@ -1,5 +1,8 @@
 package queue
 
+// Worker pool implementation — distributes transcription jobs across
+// goroutines with status tracking and error propagation.
+
 import (
 	"fmt"
 	"log"
@@ -60,13 +63,13 @@ func (wp *WorkerPool) EnqueueJob(job *Job) {
 // worker processes jobs from the queue
 func (wp *WorkerPool) worker(id int) {
 	log.Printf("Worker %d started", id)
-	
+
 	for job := range wp.jobQueue {
 		// Panic recovery
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					log.Printf("Worker %d: PANIC processing job %s: %v\n%s", 
+					log.Printf("Worker %d: PANIC processing job %s: %v\n%s",
 						id, job.ID, r, string(debug.Stack()))
 					job.Status = types.StatusFailed
 					job.Error = fmt.Errorf("Worker panic: %v", r)
@@ -142,7 +145,7 @@ func (wp *WorkerPool) processJob(workerID int, job *Job) {
 
 	// Step 5: Save metadata to database
 	if wp.db != nil {
-		err = wp.db.SaveTranscript(job.ID, job.RequestName, string(job.SourceType), 
+		err = wp.db.SaveTranscript(job.ID, job.RequestName, string(job.SourceType),
 			result.GDriveURL, localPath, result.Duration, result.WordCount)
 		if err != nil {
 			log.Printf("Worker %d: Database save failed: %v", workerID, err)
@@ -153,7 +156,7 @@ func (wp *WorkerPool) processJob(workerID int, job *Job) {
 	wp.cleanupTempFile(job.FilePath)
 
 	job.Status = types.StatusCompleted
-	log.Printf("Worker %d: Job %s completed successfully (local: %s, gdrive: %s)", 
+	log.Printf("Worker %d: Job %s completed successfully (local: %s, gdrive: %s)",
 		workerID, job.ID, localPath, driveURL)
 }
 

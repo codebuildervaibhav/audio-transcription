@@ -1,3 +1,5 @@
+// Package handlers implements HTTP and WebSocket request handlers
+// for upload, Google Drive, YouTube, and real-time audio streaming.
 package handlers
 
 import (
@@ -10,10 +12,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
 	"github.com/codebuildervaibhav/audio-transcription/internal/types"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // GDriveHandler handles Google Drive link processing
@@ -101,7 +103,7 @@ func (h *GDriveHandler) Handle(c *fiber.Ctx) error {
 func downloadGDriveFile(fileID, destPath string) error {
 	// 1. Try initial download with confirm=t (often works)
 	url := fmt.Sprintf("https://drive.google.com/uc?export=download&id=%s&confirm=t", fileID)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -126,28 +128,28 @@ func downloadGDriveFile(fileID, destPath string) error {
 		if strings.Contains(bodyStr, "accounts.google.com") || strings.Contains(bodyStr, "signin") {
 			return fmt.Errorf("file is private or not accessible (Google login required). Please make the file public ('Anyone with the link')")
 		}
-		
+
 		// Look for confirm=XXXX pattern
 		// Pattern: href="/uc?export=download&amp;id=...&amp;confirm=..."
 		re := regexp.MustCompile(`confirm=([a-zA-Z0-9_-]+)`)
 		matches := re.FindSubmatch(body)
-		
+
 		if len(matches) > 1 {
 			token := string(matches[1])
 			log.Printf("Found virus scan confirmation token: %s", token)
-			
+
 			// Retry with token
 			url = fmt.Sprintf("https://drive.google.com/uc?export=download&id=%s&confirm=%s", fileID, token)
-			
+
 			// Close previous response body before new request
 			resp.Body.Close()
-			
+
 			resp, err = http.Get(url)
 			if err != nil {
 				return fmt.Errorf("failed to download with token: %v", err)
 			}
 			defer resp.Body.Close()
-			
+
 			if resp.StatusCode != 200 {
 				return fmt.Errorf("server returned status %d with token", resp.StatusCode)
 			}

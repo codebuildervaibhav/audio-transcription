@@ -1,5 +1,8 @@
 package storage
 
+// Local filesystem storage — saves transcripts in a date-organized
+// directory structure (outputs/YYYY/MM/DD/) with metadata JSON files.
+
 import (
 	"encoding/json"
 	"fmt"
@@ -26,7 +29,7 @@ func NewLocalStorage(outputDir string) *LocalStorage {
 func (ls *LocalStorage) SaveTranscript(requestName string, result *types.TranscriptionResult) (string, error) {
 	// Create dated directory structure: outputs/2025/01/23/
 	now := time.Now()
-	dateDir := filepath.Join(ls.outputDir, 
+	dateDir := filepath.Join(ls.outputDir,
 		fmt.Sprintf("%d", now.Year()),
 		fmt.Sprintf("%02d", now.Month()),
 		fmt.Sprintf("%02d", now.Day()))
@@ -38,7 +41,7 @@ func (ls *LocalStorage) SaveTranscript(requestName string, result *types.Transcr
 	// Generate filename: 20250123_143022_podcast_episode.txt
 	timestamp := now.Format("20060102_150405")
 	baseFilename := fmt.Sprintf("%s_%s", timestamp, sanitizeFilename(requestName))
-	
+
 	txtPath := filepath.Join(dateDir, baseFilename+".txt")
 	metaPath := filepath.Join(dateDir, baseFilename+"_meta.json")
 

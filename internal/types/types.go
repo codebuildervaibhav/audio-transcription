@@ -1,3 +1,5 @@
+// Package types defines shared constants and data structures used
+// across the transcription service (job status, source types, results).
 package types
 
 import "time"

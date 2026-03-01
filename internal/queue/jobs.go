@@ -1,3 +1,5 @@
+// Package queue implements a concurrent worker pool for processing
+// transcription jobs with configurable parallelism.
 package queue
 
 import (

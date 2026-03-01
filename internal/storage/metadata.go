@@ -1,5 +1,8 @@
 package storage
 
+// SQLite metadata database — stores job history, transcript metadata,
+// duration, word count, and source info for API queries.
+
 import (
 	"database/sql"
 	"fmt"
@@ -55,7 +58,7 @@ func (mdb *MetadataDB) SaveTranscript(
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	_, err := mdb.db.Exec(query, jobID, requestName, sourceType, gdriveURL, localPath, 
+	_, err := mdb.db.Exec(query, jobID, requestName, sourceType, gdriveURL, localPath,
 		time.Now(), duration, wordCount)
 	if err != nil {
 		return fmt.Errorf("failed to save transcript metadata: %v", err)
@@ -75,9 +78,9 @@ func (mdb *MetadataDB) GetTranscript(jobID string) (map[string]interface{}, erro
 
 	var (
 		jid, name, source, gdrive, local string
-		createdAt                         time.Time
-		duration                          float64
-		wordCount                         int
+		createdAt                        time.Time
+		duration                         float64
+		wordCount                        int
 	)
 
 	err := row.Scan(&jid, &name, &source, &gdrive, &local, &createdAt, &duration, &wordCount)
@@ -115,9 +118,9 @@ func (mdb *MetadataDB) ListTranscripts(limit int) ([]map[string]interface{}, err
 	for rows.Next() {
 		var (
 			jid, name, source, gdrive, local string
-			createdAt                         time.Time
-			duration                          float64
-			wordCount                         int
+			createdAt                        time.Time
+			duration                         float64
+			wordCount                        int
 		)
 
 		if err := rows.Scan(&jid, &name, &source, &gdrive, &local, &createdAt, &duration, &wordCount); err != nil {

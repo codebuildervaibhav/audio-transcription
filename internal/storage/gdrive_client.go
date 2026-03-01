@@ -1,3 +1,5 @@
+// Package storage provides local filesystem and Google Drive persistence
+// for transcription results, plus SQLite metadata tracking.
 package storage
 
 import (
@@ -110,9 +112,9 @@ func saveToken(path string, token *oauth2.Token) {
 
 // ensureFolder finds or creates the root folder
 func (dc *DriveClient) ensureFolder() error {
-	query := fmt.Sprintf("name='%s' and mimeType='application/vnd.google-apps.folder' and trashed=false", 
+	query := fmt.Sprintf("name='%s' and mimeType='application/vnd.google-apps.folder' and trashed=false",
 		dc.folderName)
-	
+
 	r, err := dc.service.Files.List().Q(query).Spaces("drive").Fields("files(id, name)").Do()
 	if err != nil {
 		return fmt.Errorf("unable to search for folder: %v", err)
@@ -176,7 +178,7 @@ func (dc *DriveClient) Upload(requestName string, result *types.TranscriptionRes
 	}
 
 	metaJSON, _ := json.MarshalIndent(metadata, "", "  ")
-	
+
 	metaFile := &drive.File{
 		Name:    baseFilename + "_meta.json",
 		Parents: []string{folderID},

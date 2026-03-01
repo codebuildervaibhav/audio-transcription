@@ -1,5 +1,8 @@
 package transcription
 
+// Whisper integration — invokes OpenAI Whisper via Python CLI with
+// configurable model size and CUDA GPU device selection.
+
 import (
 	"encoding/json"
 	"fmt"
@@ -27,7 +30,7 @@ func NewWhisperTranscriber(modelPath string, threads int, device string) (*Whisp
 	// For Python Whisper, we use the model name instead of path
 	// Extract model name from path (e.g., "ggml-small.bin" -> "small")
 	modelName := "small" // Default to small
-	
+
 	if strings.Contains(modelPath, "tiny") {
 		modelName = "tiny"
 	} else if strings.Contains(modelPath, "base") {
@@ -77,9 +80,9 @@ func (wt *WhisperTranscriber) Transcribe(audioPath string) (*types.Transcription
 		"--model", wt.modelName,
 		"--output_dir", tempDir,
 		"--output_format", "json", // Get JSON for segments
-		"--language", "en",         // Auto-detect if not specified
-		"--device", wt.device,      // Use configured device (cuda or cpu)
-		"--fp16", "False",          // Disable fp16 for compatibility (unless on GPU, but safe to keep False for now)
+		"--language", "en", // Auto-detect if not specified
+		"--device", wt.device, // Use configured device (cuda or cpu)
+		"--fp16", "False", // Disable fp16 for compatibility (unless on GPU, but safe to keep False for now)
 	)
 
 	// Capture output
@@ -134,8 +137,8 @@ func (wt *WhisperTranscriber) Transcribe(audioPath string) (*types.Transcription
 
 // WhisperOutput matches Python Whisper's JSON output format
 type WhisperOutput struct {
-	Text     string          `json:"text"`
-	Language string          `json:"language"`
+	Text     string           `json:"text"`
+	Language string           `json:"language"`
 	Segments []WhisperSegment `json:"segments"`
 }
 

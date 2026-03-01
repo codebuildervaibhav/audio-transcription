@@ -1,5 +1,8 @@
 package handlers
 
+// WebSocket streaming handler — accepts binary audio chunks and
+// queues them for transcription once the client sends an END signal.
+
 import (
 	"bytes"
 	"fmt"
@@ -7,10 +10,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gofiber/websocket/v2"
-	"github.com/google/uuid"
 	"github.com/codebuildervaibhav/audio-transcription/internal/queue"
 	"github.com/codebuildervaibhav/audio-transcription/internal/types"
+	"github.com/gofiber/websocket/v2"
+	"github.com/google/uuid"
 )
 
 // StreamHandler handles WebSocket audio streaming
@@ -47,13 +50,13 @@ func (h *StreamHandler) Handle(c *websocket.Conn) {
 		// Handle text messages (control)
 		if messageType == websocket.TextMessage {
 			msgStr := string(message)
-			
+
 			// Check for control messages
 			if msgStr == "END" {
 				log.Printf("Received END signal, processing stream...")
 				break
 			}
-			
+
 			// Set request name
 			if len(msgStr) > 0 && len(msgStr) < 200 {
 				requestName = msgStr
@@ -81,7 +84,7 @@ func (h *StreamHandler) Handle(c *websocket.Conn) {
 
 	// Save buffered audio to temp file
 	tempPath := filepath.Join("temp", fmt.Sprintf("%s.webm", jobID))
-	
+
 	if err := os.WriteFile(tempPath, buffer.Bytes(), 0644); err != nil {
 		log.Printf("Failed to save stream buffer: %v", err)
 		return
