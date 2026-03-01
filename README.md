@@ -54,9 +54,10 @@ A high-performance, GPU-accelerated audio-to-text transcription service built wi
    ```
 
 ### Optional
-4. **yt-dlp** - For YouTube audio extraction
+4. **yt-dlp** - For YouTube audio extraction and  Install a JavaScript runtime (required by yt-dlp for YouTube)
    ```bash
    pip install yt-dlp
+   npm install -g esbuild  
    ```
 
 5. **Google Drive API Credentials** - For cloud storage
