@@ -1,6 +1,6 @@
-# Audio Transcription Backend
+# Audio Transcription Service
 
-A production-ready Golang backend for audio-to-text transcription supporting multiple input methods: file uploads, Google Drive links, YouTube videos, and real-time audio streaming.
+A high-performance, GPU-accelerated audio-to-text transcription service built with **Go** and **OpenAI Whisper**. Supports multiple input methods: file uploads, Google Drive links, YouTube videos, and real-time WebSocket audio streaming.
 
 ## Features
 
@@ -21,9 +21,10 @@ A production-ready Golang backend for audio-to-text transcription supporting mul
 - Panic recovery and error handling
 - Graceful shutdown
 
-✅ **Powered by Whisper Small**
+✅ **Powered by OpenAI Whisper + CUDA GPU Acceleration**
 - ~95% accuracy for clear English audio
-- ~20-30 seconds processing per minute of audio
+- GPU-accelerated inference via PyTorch CUDA (cu118)
+- Configurable model sizes (tiny, base, small, medium, large)
 - Timestamps for each segment
 
 ---
@@ -44,21 +45,12 @@ A production-ready Golang backend for audio-to-text transcription supporting mul
    sudo apt install ffmpeg
    ```
 
-3. **Whisper.cpp** - AI transcription engine
+3. **Python 3.9+** with **OpenAI Whisper** - AI transcription engine
    ```bash
-   # Clone and build
-   git clone https://github.com/ggerganov/whisper.cpp
-   cd whisper.cpp
-   make
+   pip install openai-whisper
    
-   # Download the model (whisper-small, ~500MB)
-   bash ./models/download-ggml-model.sh small
-   
-   # Copy model to your project
-   cp models/ggml-small.bin /path/to/listner/models/
-   
-   # Copy the whisper binary to your project root
-   cp main /path/to/listner/whisper
+   # For GPU acceleration (recommended)
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
    ```
 
 ### Optional
@@ -80,7 +72,8 @@ A production-ready Golang backend for audio-to-text transcription supporting mul
 
 ### 1. Clone & Setup
 ```bash
-cd D:\Development\listner
+git clone https://github.com/codebuildervaibhav/audio-transcription.git
+cd audio-transcription
 
 # Install Go dependencies
 go mod download
@@ -88,11 +81,8 @@ go mod download
 # Verify FFmpeg is installed
 ffmpeg -version
 
-# Verify whisper binary exists
-ls ./whisper  # Should show the whisper.cpp binary
-
-# Verify model exists
-ls ./models/ggml-small.bin
+# Verify Whisper is installed
+python -m whisper --help
 ```
 
 ### 2. Configure
@@ -103,20 +93,20 @@ server:
   host: "0.0.0.0"
 
 whisper:
-  model_path: "./models/ggml-small.bin"
-  threads: 4  # Adjust based on your CPU cores
+  model: "small"      # tiny, base, small, medium, large
+  device: "cuda"       # cuda (GPU) or cpu
 
 workers:
-  count: 4  # Number of concurrent transcription workers
+  count: 4             # Number of concurrent transcription workers
 ```
 
 ### 3. Run
 ```bash
 # Development
-go run cmd/server/main.go
+go run ./cmd/server
 
 # Production (build binary)
-go build -o transcription-server cmd/server/main.go
+go build -o transcription-server ./cmd/server
 ./transcription-server
 ```
 
@@ -297,9 +287,9 @@ yt-dlp --version
 
 ## Performance
 
-### Whisper Small Model
-- **RAM Usage:** ~2GB
-- **Processing Speed:** 20-30 seconds per minute of audio (on modern CPU)
+### Whisper Small Model (CUDA GPU)
+- **VRAM Usage:** ~2GB
+- **Processing Speed:** ~5-10 seconds per minute of audio (NVIDIA GPU with CUDA)
 - **Accuracy:** ~95% for clear English audio
 - **Concurrency:** 4 workers = ~240 minutes/hour throughput
 
@@ -334,47 +324,44 @@ To scale to multiple users/servers:
 
 3. **Deploy Multiple Workers**
    ```bash
-   # Server 1: API + 2 workers
-   # Server 2: 4 workers only
+   # Server 1: API + 2 GPU workers
+   # Server 2: 4 GPU workers only
    # Load balancer in front
    ```
 
-See [project_context.md](./project_context.md) for detailed architecture evolution path.
+See the project wiki for detailed architecture evolution path.
 
 ---
 
 ## Project Structure
 
 ```
-listner/
-├── cmd/server/main.go               # Entry point
+audio-transcription/
+├── cmd/server/main.go               # Entry point & server setup
 ├── internal/
-│   ├── handlers/                    # HTTP/WebSocket handlers
-│   │   ├── upload.go
-│   │   ├── gdrive.go
-│   │   ├── youtube.go
-│   │   └── stream.go
-│   ├── transcription/               # Audio processing
-│   │   ├── whisper.go
-│   │   ├── audio.go
-│   │   └── diarization.go
-│   ├── storage/                     # Storage layer
-│   │   ├── local.go
-│   │   ├── gdrive_client.go
-│   │   └── metadata.go
-│   ├── queue/                       # Job queue
-│   │   ├── worker.go
-│   │   └── jobs.go
-│   └── cleanup/                     # Temp file cleanup
-│       └── scheduler.go
-├── config/config.yaml               # Configuration
-├── outputs/                         # Transcripts
-├── temp/                            # Temporary files (auto-cleaned)
-├── models/                          # Whisper models
-│   └── ggml-small.bin
-├── whisper                          # Whisper.cpp binary
-├── credentials.json                 # Google Drive OAuth (if using)
+│   ├── handlers/                    # HTTP/WebSocket request handlers
+│   │   ├── upload.go                # File upload endpoint
+│   │   ├── gdrive.go                # Google Drive download handler
+│   │   ├── youtube.go               # YouTube audio extraction
+│   │   └── stream.go                # WebSocket streaming handler
+│   ├── transcription/               # Audio processing & Whisper integration
+│   │   ├── whisper.go               # Python Whisper CLI wrapper
+│   │   ├── audio.go                 # FFmpeg audio normalization
+│   │   └── diarization.go           # Speaker diarization (future)
+│   ├── storage/                     # Persistence layer
+│   │   ├── local.go                 # Local filesystem storage
+│   │   ├── gdrive_client.go         # Google Drive API client
+│   │   └── metadata.go              # SQLite metadata database
+│   ├── queue/                       # Concurrent job processing
+│   │   ├── worker.go                # Worker pool implementation
+│   │   └── jobs.go                  # Job & result types
+│   ├── types/                       # Shared type definitions
+│   │   └── types.go
+│   └── cleanup/                     # Background maintenance
+│       └── scheduler.go             # Temp file cleanup scheduler
+├── config/config.yaml               # Server & Whisper configuration
 ├── go.mod
+├── go.sum
 └── README.md
 ```
 
@@ -388,7 +375,9 @@ MIT License - feel free to use for personal or commercial projects.
 
 ## Credits
 
-- **Whisper** by OpenAI (via whisper.cpp by Georgi Gerganov)
-- **Fiber** web framework
-- **Google Drive API**
-- **yt-dlp** for YouTube extraction
+- **[OpenAI Whisper](https://github.com/openai/whisper)** — speech recognition model
+- **[Fiber](https://gofiber.io/)** — Express-inspired Go web framework
+- **[PyTorch](https://pytorch.org/)** — GPU-accelerated deep learning (CUDA)
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube audio extraction
+- **[Google Drive API](https://developers.google.com/drive)** — cloud storage integration
+- **[modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite)** — pure Go SQLite driver

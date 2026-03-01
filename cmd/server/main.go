@@ -1,3 +1,6 @@
+// Audio Transcription Service - GPU-accelerated speech-to-text API
+// Built with Go (Fiber) + OpenAI Whisper + CUDA
+// https://github.com/codebuildervaibhav/audio-transcription
 package main
 
 import (
@@ -29,37 +32,37 @@ type Config struct {
 		Port int    `yaml:"port"`
 		Host string `yaml:"host"`
 	} `yaml:"server"`
-	
+
 	Whisper struct {
 		Model     string `yaml:"model"`
 		ModelPath string `yaml:"model_path"`
 		Threads   int    `yaml:"threads"`
 		Device    string `yaml:"device"`
 	} `yaml:"whisper"`
-	
+
 	Workers struct {
 		Count int `yaml:"count"`
 	} `yaml:"workers"`
-	
+
 	Storage struct {
 		TempDir   string `yaml:"temp_dir"`
 		OutputDir string `yaml:"output_dir"`
 		Database  string `yaml:"database"`
 	} `yaml:"storage"`
-	
+
 	Cleanup struct {
 		IntervalMinutes int `yaml:"interval_minutes"`
 		MaxAgeHours     int `yaml:"max_age_hours"`
 	} `yaml:"cleanup"`
-	
+
 	GoogleDrive struct {
 		CredentialsFile string `yaml:"credentials_file"`
 		TokenFile       string `yaml:"token_file"`
 		FolderName      string `yaml:"folder_name"`
 	} `yaml:"google_drive"`
-	
+
 	Limits struct {
-		MaxFileSizeMB     int `yaml:"max_file_size_mb"`
+		MaxFileSizeMB      int `yaml:"max_file_size_mb"`
 		MaxDurationMinutes int `yaml:"max_duration_minutes"`
 	} `yaml:"limits"`
 }
@@ -169,7 +172,7 @@ func main() {
 	// Routes
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
-			"status": "healthy",
+			"status":  "healthy",
 			"version": "1.0.0",
 		})
 	})
@@ -194,24 +197,24 @@ func main() {
 	// Get transcript text
 	app.Get("/transcripts/:id/text", func(c *fiber.Ctx) error {
 		jobID := c.Params("id")
-		
+
 		// Get metadata to find file path
 		transcript, err := db.GetTranscript(jobID)
 		if err != nil {
 			return c.Status(404).JSON(fiber.Map{"error": "Transcript not found"})
 		}
-		
+
 		localPath, ok := transcript["local_path"].(string)
 		if !ok || localPath == "" {
 			return c.Status(404).JSON(fiber.Map{"error": "Transcript file path not found"})
 		}
-		
+
 		// Read file content
 		content, err := os.ReadFile(localPath)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "Failed to read transcript file"})
 		}
-		
+
 		return c.SendString(string(content))
 	})
 
@@ -259,22 +262,22 @@ type LogBuffer struct {
 func (lb *LogBuffer) Write(p []byte) (n int, err error) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
-	
+
 	// Append new line
 	lb.lines = append(lb.lines, string(p))
-	
+
 	// Keep last 1000 lines
 	if len(lb.lines) > 1000 {
 		lb.lines = lb.lines[len(lb.lines)-1000:]
 	}
-	
+
 	return len(p), nil
 }
 
 func (lb *LogBuffer) GetLogs() []string {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
-	
+
 	// Return copy of slice
 	logs := make([]string, len(lb.lines))
 	copy(logs, lb.lines)

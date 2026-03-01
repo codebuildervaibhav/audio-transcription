@@ -1,6 +1,8 @@
-# DO NOT COMMIT THESE FILES TO VERSION CONTROL
+# ============================================
+# Audio Transcription Service - .gitignore
+# ============================================
 
-# Temporary files
+# ---------- Temporary & Audio Files ----------
 temp/
 *.wav
 *.mp3
@@ -12,47 +14,70 @@ temp/
 *.wma
 *.opus
 
-# Database
+# ---------- Database ----------
 *.db
 *.db-shm
 *.db-wal
-transcription.db
 
-# Google Drive credentials
+# ---------- Google Drive Credentials ----------
 credentials.json
 token.json
 
-# Whisper models (large files)
+# ---------- Whisper Models ----------
 models/*.bin
 
-# Build artifacts
+# ---------- Build Artifacts ----------
 transcription-server
 transcription-server.exe
 *.exe
 
-# Go
+# ---------- Go ----------
 vendor/
 
-# IDE
+# ---------- IDE ----------
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# ---------- OS ----------
 .DS_Store
 Thumbs.db
 
-# Logs
+# ---------- Logs ----------
 *.log
 
-# Output (optional - remove if you want to track transcripts)
-# outputs/
+# ---------- Output Data ----------
+outputs/
 
-# Debug files
+# ---------- Debug & HTML ----------
 *.html
 *_debug.*
+
+# ---------- Internal Scripts ----------
+diagnose.ps1
+fix_go.ps1
+setup.ps1
+setup_whisper.ps1
+verify_setup.ps1
+test_api.sh
+
+# ---------- Internal Planning / Context Docs ----------
+implementation_plan.md
+project_context.md
+postman_collection_update.json
+walkthrough.md
+task.md
+PYTHON_WHISPER_NOTES.md
+POSTMAN_GUIDE.md
+QUICKSTART.md
+WINDOWS_SETUP.md
+
+# ---------- Testing ----------
+testing audios/
+
+# ---------- Misc Temp / Draft Files ----------
 *_test.ps1
 *_temp.ps1
 notes.md
